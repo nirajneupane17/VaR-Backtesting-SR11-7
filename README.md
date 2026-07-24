@@ -13,7 +13,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 **Author:** Niraj Neupane, CA (ICAI) · Quantitative Developer & Founder, Korvane & Calderyn Institute  
-**SSRN:** *Forthcoming* · **Series:** Korvane Research Series No. 1
+**SSRN:** *Forthcoming* 
 
 </div>
 
