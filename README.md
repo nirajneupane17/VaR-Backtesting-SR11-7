@@ -69,7 +69,7 @@ Generative AI (Claude, Anthropic) was used to assist with implementation of the 
 
 If you use this data or code, please cite:
 
-> Neupane, N. (2026). Backtesting Value-at-Risk Models Under SR 11-7: A Comparative Analysis of Kupiec, Christoffersen, and Basel Traffic-Light Tests Applied to S&P 500 Returns (2018–2024). *Korvane Research Series No. 1.* SSRN. [link]
+> Neupane, N. (2026). Backtesting Value-at-Risk Models Under SR 11-7: A Comparative Analysis of Kupiec, Christoffersen, and Basel Traffic-Light Tests Applied to S&P 500 Returns (2018–2024). SSRN. [link]
 
 ## License
 
