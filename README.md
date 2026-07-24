@@ -1,6 +1,6 @@
 # Backtesting Value-at-Risk Models Under SR 11-7
 
-**Author:** Niraj Neupane, CA (ICAI) — Quantitative Developer & Founder, Korvane & Calderyn Institute
+**Author:** Niraj Neupane, CA (ICAI): Quantitative Developer & Founder, Korvane & Calderyn Institute
 **Paper:** *Backtesting Value-at-Risk Models Under SR 11-7: A Comparative Analysis of Kupiec, Christoffersen, and Basel Traffic-Light Tests Applied to S&P 500 Returns (2018–2024)*
 **Series:** Korvane Research Series No. 1
 **SSRN:** 
