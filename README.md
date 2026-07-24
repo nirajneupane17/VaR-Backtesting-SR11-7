@@ -2,7 +2,6 @@
 
 # Backtesting Value-at-Risk Models Under SR 11-7
 
-### Korvane Research Series No. 1
 
 *A walk-forward backtest of Historical Simulation, Parametric, and Student-t VaR*  
 *against S&P 500 returns (2018–2024) using Kupiec, Christoffersen, and Basel Traffic Light tests.*
