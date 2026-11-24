@@ -2,9 +2,8 @@
 
 # Backtesting Value-at-Risk Models Under SR 11-7
 
-
-*A walk-forward backtest of Historical Simulation, Parametric, and Student-t VaR*  
-*against S&P 500 returns (2018–2024) using Kupiec, Christoffersen, and Basel Traffic Light tests.*
+*A walk-forward backtest of Historical Simulation, Parametric Normal and Student-t VaR on S&P 500 returns,*  
+*benchmarked against conditional models, with finite-sample and estimation-risk corrections and a 2000–2026 robustness sample.*
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://python.org)
 [![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white)](https://numpy.org)
@@ -13,234 +12,190 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 **Author:** Niraj Neupane, CA (ICAI) · Quantitative Developer & Founder, Korvane & Calderyn Institute  
-**SSRN:** *Forthcoming* 
+**Status:** Revised version under journal review (November 2026)
 
 </div>
 
 ---
 
-## Abstract
-
-This paper backtests three Value-at-Risk (VaR) models — Historical Simulation, Parametric (Normal), and Student-t — against S&P 500 daily returns from January 2018 through December 2024. The study uses a **walk-forward design**: each model is recalibrated daily on the previous 250 trading days and tested on the *next* day's actual return — producing 1,509 genuine out-of-sample forecasts per model.
-
-Three tests are applied: **Kupiec POF (1995)**, **Christoffersen Conditional Coverage (1998)**, and the **Basel Committee Traffic Light**, all under the SR 11-7 model risk framework (superseded by SR 26-2 in April 2026).
-
-**Key finding:** At 99% confidence, all three models fail unconditional coverage — but not equally. Parametric Normal is the worst offender (44 violations, LR = 36.92, p < 0.0001) versus HS (26, LR = 6.55) and Student-t (28, LR = 8.91). The 2022 rate-hiking bear market caused *more* excess violations than the sharper COVID crash. None of the models reached Basel's Green zone in 2024.
+> **Revision note (November 2026).** The analysis in this repository was substantially extended during peer review.
+> Several conclusions of the July 2026 working paper (`Neupane_2026_Backtesting_VaR_SR11-7.pdf`) have been
+> **revised or withdrawn** in light of new evidence; see [What changed](#what-changed-since-the-july-2026-working-paper).
+> The `code/` folder reproduces every result of the revised version. The original notebook (`Data_python.ipynb`)
+> is kept unchanged for reference.
 
 ---
 
-## Repository Contents
+## Summary
 
-| File | Description |
+Three VaR models — Historical Simulation (HS), Parametric Normal and Student-t — are re-estimated **daily on an
+equally weighted 250-day window** and evaluated on the next day's S&P 500 log return: **1,509 out-of-sample
+forecasts** (January 2019 – December 2024). They are compared, on identical data and windows, with three
+**conditional benchmarks**: EWMA-Normal, **filtered historical simulation (FHS)** and GARCH(1,1)-t.
+
+Adequacy is assessed with the Kupiec, Christoffersen and Christoffersen–Pelletier duration tests (with Monte Carlo
+p-values), a simulation of estimation risk for this exact design, and the regulatory traffic-light test under both
+the US market risk rule (12 CFR 217.204) and Basel MAR32. A robustness sample re-runs everything over
+**January 2000 – October 2026 (6,748 forecasts)**.
+
+### Main findings
+
+| # | Finding | Evidence |
+|:-:|:---|:---|
+| 1 | All three equally weighted models fail 99% unconditional coverage; the Normal model by far the most (44 violations vs 15.1 expected). | Kupiec; HS rejection survives the estimation-risk correction (simulated p ≈ 0.02–0.03) |
+| 2 | Violation clustering is present in **every** equally weighted model, at both confidence levels. | Duration test rejects all six model–confidence combinations (MC p < 0.001) |
+| 3 | The clustering comes from **equal weighting within the window**, not from rolling-window estimation or tail shape. | FHS, EWMA-Normal and GARCH-t show no significant clustering on the same data; FHS passes every test in 2019–2024 |
+| 4 | Estimation risk materially distorts the Kupiec test. | With linear-interpolation quantiles a *correct* HS model is rejected ~12% of the time at nominal 5% |
+| 5 | A single 250-day traffic-light window is weak evidence. | All six models — including the conditional benchmarks — are Amber in 2024; a correct model is Amber or worse ~11% of the time |
+| 6 | Over 2000–2026 the conclusions hold, and **abrupt crashes, not gradual declines**, produce the largest violation excesses. | Equally weighted models fail every independence/duration test; FHS never enters the Red zone in 6,499 rolling windows |
+
+---
+
+## What changed since the July 2026 working paper
+
+| July 2026 working paper | Revised version |
 |:---|:---|
-| `Neupane_2026_Backtesting_VaR_SR11-7.pdf` | Full research paper (PDF) |
-| `Neupane_2026_Backtesting_VaR_SR11-7.docx` | Full research paper (Word) |
-| `Data_S_P500.csv` | S&P 500 daily prices and log returns (2018–2024 · 1,759 days) |
-| `Data_python.ipynb` | Python notebook — VaR estimation + full backtesting pipeline |
-| `Code.html` | Rendered HTML output of the analysis notebook |
+| Clustering is "baked into fixed-window VaR estimation". | **Withdrawn.** Conditional benchmarks on the same window remove it; the cause is equal weighting. |
+| The gradual 2022 regime shift caused more excess violations than the COVID crash. | **Withdrawn.** The 2020 vs 2022 counts are not statistically different (Fisher p = 0.28–0.64), and across six episodes since 2000 abrupt crashes produce the larger excesses. |
+| Student-t passes independence at 99% (p = 0.107). | **Reversed.** Monte Carlo p = 0.042; the duration test rejects (p < 0.001). |
+| None of the models reach the Green zone in 2024. | **Reframed.** True, but so do the conditional benchmarks; the rolling zone distribution is reported instead. |
+| Basel multipliers 3.00–4.00, zones Green/Yellow/Red, cited to BCBS (2019). | **Corrected.** 3.00–4.00 is the US market risk rule (12 CFR 217.204); Basel MAR32.9 uses 1.50 / 1.70–1.92 / 2.00 with Green/Amber/Red. Both are reported. |
+| Student-t VaR described with a standardised t quantile and σ. | **Corrected.** The estimator is a location–scale t (unrestricted MLE); the fitted ν is ≤ 2 in 19% of windows (82% in 2020). |
+| Student-t 95% count 88. | 89 with the current code (optimiser-sensitive; no conclusion changes). |
+| Static backtests "tell a different story" (asserted). | **Now shown** (static-calibration comparison). |
 
 ---
 
-## S&P 500 Returns — 2018–2024
+## Repository contents
 
-![S&P 500 Returns](results/01_sp500_returns.png)
-
----
-
-## Data
-
-### `Data_S_P500.csv`
-
-| Column | Description |
+| Path | Description |
 |:---|:---|
-| `Date` | Trading date (YYYY-MM-DD) |
-| `Price` | S&P 500 daily closing price |
-| `Log_Return` | Daily log return: ln(Pₜ / Pₜ₋₁) |
-| `Log_Return_%` | Log return expressed as percentage |
-
-**Coverage:** January 3, 2018 – December 30, 2024 · **1,759 trading days**  
-**Out-of-sample:** January 2, 2019 – December 30, 2024 · **1,509 forecast days**
-
-| Period | Obs | Mean (%) | Std Dev (%) | Min (%) | Max (%) | Skewness | Ex. Kurtosis |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Full Sample | 1,759 | 0.045 | 1.248 | −12.765 | 8.968 | −0.816 | **14.415** |
-| Pre-COVID (2018–2019) | 502 | 0.036 | 0.944 | −4.184 | 4.840 | −0.612 | 3.641 |
-| COVID Crisis (2020) | 253 | 0.060 | 2.185 | −12.765 | 8.968 | −0.866 | 8.507 |
-| Post-COVID Bull (2021) | 252 | 0.095 | 0.826 | −2.601 | 2.351 | −0.369 | 0.698 |
-| Rate Hike Bear (2022) | 251 | −0.086 | 1.524 | −4.420 | 5.395 | −0.009 | 0.336 |
-| Recovery (2023–2024) | 501 | 0.086 | 0.811 | −3.043 | 2.498 | −0.285 | 0.734 |
-
-Excess kurtosis of **14.41** and Jarque–Bera = **15,424.4 (p < 0.0001)** confirm severe non-normality.  
-Negative skewness (−0.816) reflects the well-documented leverage effect in equity returns.
+| `code/` | Python pipeline reproducing every table and figure of the revised version |
+| `data/sp500_close_2018_2024.csv` | S&P 500 closes, 2 Jan 2018 – 30 Dec 2024 (1,760 closes → 1,759 log returns) |
+| `data/sp500_close_1999_2026.csv` | S&P 500 closes, 31 Dec 1998 – 30 Oct 2026 (robustness sample) |
+| `results/revision/` | Output tables (CSV/JSON), run logs and figures of the revised analysis |
+| `Data_S&P500.csv` | Original data file (prices and log returns, 3 Jan 2018 – 30 Dec 2024); identical to `data/sp500_close_2018_2024.csv` on all 1,759 days |
+| `Data_python.ipynb`, `Code.html` | Original July 2026 notebook and its rendered output |
+| `Neupane_2026_Backtesting_VaR_SR11-7.pdf / .docx` | July 2026 working paper (superseded; see revision note) |
+| `results/0*.png` | Charts from the July 2026 working paper |
 
 ---
 
-## Walk-Forward VaR Estimates vs Realized Returns
+## Reproducing the results
 
-![VaR Time Series](results/02_var_timeseries.png)
-
----
-
-## Methodology
-
-### Three VaR Models
-
-**Historical Simulation (HS)** — Empirical (1−α)-th percentile of the trailing 250-day return window. No distributional assumption. Captures fat tails automatically but lags during regime shifts.
-
-**Parametric (Normal)** — Assumes normally distributed returns. Estimates μ and σ from the trailing 250-day window daily. Fast and interpretable but underestimates tail risk by design.
-
-**Student-t** — Adds a degrees-of-freedom parameter ν, estimated by maximum likelihood on each daily rolling window. Explicitly models fat tails.
-
-### Walk-Forward Design
-
-```
-For each day t from 250 to 1,759:
-  ├── Fit model on returns[t-250 : t]   ← trailing 250 days only
-  ├── Forecast VaR for day t+1          ← out-of-sample
-  └── Record violation if return[t] < −VaR
+```bash
+pip install -r requirements.txt
+cd code
+mkdir -p out
+python replicate.py    # descriptive statistics, base models, Kupiec and Christoffersen     (~1 min)
+python analysis.py     # conditional benchmarks, MC p-values, duration tests, Fisher tests,
+                       # subperiod clustering, rolling zones, static calibration, Holm      (~5 min)
+python sim_size.py     # estimation-risk simulation of the walk-forward design             (~20 s)
+python figures.py      # Figures 1–2
+python robust.py       # robustness sample, Jan 2000 – Oct 2026                            (~8 min)
+python sim_long.py     # estimation-risk simulation for the robustness sample
+python fig3.py         # Figure 3
 ```
 
-1,509 out-of-sample forecasts per model. Zero look-ahead bias.
+Outputs are written to `code/out/`; the reference outputs are in `results/revision/`. Random seeds are fixed.
 
-### Backtesting Tests
-
-| Test | What It Checks | Statistic |
-|:---|:---|:---:|
-| **Kupiec POF (1995)** | Observed violation rate = theoretical rate | χ²(1) |
-| **Christoffersen CC (1998)** | Coverage + independence from clustering | χ²(2) |
-| **Basel Traffic Light** | Violation count → Green / Yellow / Red zone | Count |
+**Conventions.** HS uses the linear-interpolation empirical quantile (NumPy default; Hyndman–Fan type 7).
+The Normal model uses the sample mean and standard deviation (ddof = 1). The Student-t model is a location–scale t
+fitted by unrestricted maximum likelihood (`scipy.stats.t.fit`). EWMA and FHS use λ = 0.94 (RiskMetrics, not tuned),
+initialised at the variance of the first 250 returns. GARCH(1,1)-t is re-estimated daily on the trailing 250 returns
+with the `arch` package. Every forecast uses information up to t − 1 only.
 
 ---
 
-## Backtesting Results Dashboard
+## Key results (2019–2024, 99% VaR)
 
-![Backtesting Dashboard](results/03_backtesting_dashboard.png)
+| Model | Violations (15.1 exp.) | Kupiec p | Consecutive pairs | Independence MC p | Duration MC p |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| Historical Simulation | 26 | 0.010 | 3 | 0.004 | <0.001 |
+| Parametric Normal | 44 | <0.001 | 4 | 0.023 | <0.001 |
+| Student-t | 28 | 0.003 | 2 | 0.042 | <0.001 |
+| EWMA-Normal | 37 | <0.001 | 1 | 0.931 | 0.166 |
+| **Filtered HS** | **22** | **0.094** | **0** | **0.530** | **0.956** |
+| GARCH(1,1)-t | 29 | 0.001 | 0 | 0.361 | 0.366 |
+
+![VaR paths 2020 and 2022](results/revision/figures/figure1_var_paths.png)
+
+*99% VaR for HS, Normal and FHS against realised volatility and losses. In both years the equally weighted
+models lag; FHS does not.*
+
+### Regulatory traffic-light test
+
+| Violations (250 days, 99%) | Zone | US rule (12 CFR 217.204) | Basel MAR32.9 |
+|:---:|:---:|:---:|:---:|
+| 0–4 | 🟢 Green | 3.00 | 1.50 |
+| 5–9 | 🟠 Amber | 3.40–3.85 | 1.70–1.92 |
+| ≥ 10 | 🔴 Red | 4.00 | 2.00 |
+
+![Rolling traffic-light counts](results/revision/figures/figure2_rolling_zones.png)
 
 ---
 
-## Results
+## Robustness: January 2000 – October 2026
 
-### Kupiec Proportion of Failures Test (T = 1,509)
-
-| Model | Confidence | Violations | Expected | LR Statistic | p-value | Decision |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Historical Simulation | 95% | 71 | 75.5 | 0.282 | 0.596 | ✅ PASS |
-| Parametric (Normal) | 95% | 78 | 75.5 | 0.090 | 0.764 | ✅ PASS |
-| Student-t | 95% | 88 | 75.5 | 2.091 | 0.148 | ✅ PASS |
-| Historical Simulation | 99% | 26 | 15.1 | 6.551 | 0.010 | ❌ REJECT |
-| Parametric (Normal) | 99% | **44** | 15.1 | **36.917** | <0.0001 | ❌ REJECT |
-| Student-t | 99% | 28 | 15.1 | 8.910 | 0.003 | ❌ REJECT |
-
-### Christoffersen Conditional Coverage Test
-
-| Model | Conf | π₀₁ (%) | π₁₁ (%) | LR Independence | LR Joint CC | Ind. | CC |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Historical Simulation | 95% | 4.24 | 14.08 | 9.989 (p=0.002) | 10.270 (p=0.006) | ❌ | ❌ |
-| Parametric (Normal) | 95% | 4.69 | 14.10 | 9.526 (p=0.002) | 9.616 (p=0.008) | ❌ | ❌ |
-| Student-t | 95% | 5.28 | 14.77 | 10.008 (p=0.002) | 12.099 (p=0.002) | ❌ | ❌ |
-| Historical Simulation | 99% | 1.55 | 11.54 | 6.834 (p=0.009) | 13.386 (p=0.001) | ❌ | ❌ |
-| Parametric (Normal) | 99% | 2.73 | 9.09 | 4.017 (p=0.045) | 40.934 (p<0.0001) | ❌ | ❌ |
-| Student-t | 99% | 1.76 | 7.14 | 2.593 (p=0.107) | 11.502 (p=0.003) | ✅ | ❌ |
-
-### Basel Traffic Light — Trailing 250 Days (2024)
-
-| Model | Violations | Expected | Zone | Capital Multiplier |
+| Model (99%) | Violations (67.5 exp.) | Kupiec p | Duration MC p | % of windows Red |
 |:---|:---:|:---:|:---:|:---:|
-| Historical Simulation | 6 | 2.5 | 🟡 Yellow | 3.50× |
-| Parametric (Normal) | 6 | 2.5 | 🟡 Yellow | 3.50× |
-| Student-t | 5 | 2.5 | 🟡 Yellow | 3.40× |
+| Historical Simulation | 113 | <0.001 | ≤0.001 | 9.0 |
+| Parametric Normal | 168 | <0.001 | ≤0.001 | 25.2 |
+| Student-t | 104 | <0.001 | ≤0.001 | 8.4 |
+| EWMA-Normal | 148 | <0.001 | 0.013 | 9.5 |
+| **Filtered HS** | **94** | 0.002 | **0.973** | **0.0** |
+| GARCH(1,1)-t | 127 | <0.001 | 0.578 | 2.6 |
+
+FHS's 94 violations match the ~92 that estimation risk alone produces for a correctly specified model using this
+quantile convention (simulated p = 0.32–0.39). At 99% FHS still fails the first-order Markov independence test
+(six consecutive-violation pairs in 26 years), because the EWMA filter reacts to a shock only on the next day.
+
+![Rolling traffic-light counts 2000–2026](results/revision/figures/figure3_rolling_zones_long.png)
 
 ---
 
-## Violation Analysis
+## SR 11-7 / SR 26-2 implications
 
-![Violation Analysis](results/04_violation_analysis.png)
-
----
-
-## Subperiod Analysis — 99% VaR Violations
-
-| Period | Obs | Expected | HS | Excess | Normal | Excess | Student-t | Excess |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Pre-COVID (2019) | 252 | 2.5 | 1 | −60% | 4 | +59% | 1 | −60% |
-| COVID Crisis (2020) | 253 | 2.5 | 8 | +216% | 14 | +453% | 8 | +216% |
-| Post-COVID Bull (2021) | 252 | 2.5 | 1 | −60% | 3 | +19% | 1 | −60% |
-| **Rate Hike Bear (2022)** | 251 | 2.5 | **10** | **+298%** | **17** | **+577%** | **13** | **+418%** |
-| Recovery (2023–2024) | 501 | 5.0 | 6 | +20% | 6 | +20% | 5 | 0% |
+- Document the Parametric Normal failure at 99% — it is far beyond what estimation risk can produce.
+- Treat a simple conditional model (e.g. FHS) as the **minimum challenger** before attributing failures to tail shape.
+- Report finite-sample evidence: state the quantile convention, use simulated critical values, Monte Carlo or duration-based p-values, and rolling traffic-light distributions rather than a single window.
+- Treat calendar-year violation comparisons as descriptive unless formally tested.
+- SR 26-2 (April 2026) retains outcomes analysis and independent validation while scaling oversight to materiality; for capital models these findings remain central.
 
 ---
 
-## Model Performance Summary
+## Related work
 
-![Model Summary](results/05_model_summary.png)
-
----
-
-## Key Findings
-
-**1. All three models fail at 99% — but not equally.**  
-Parametric Normal fails by the widest margin (LR = 36.92 vs 6.55 and 8.91). All three pass at 95%.
-
-**2. Violation clustering is structural — not distributional.**  
-Every model fails Christoffersen independence at 95%. Only Student-t passes at 99%, but still fails the joint test. Clustering during stress is baked into fixed-window VaR estimation.
-
-**3. Slow regime shifts are harder than sudden shocks.**  
-The 2022 rate-hiking bear market caused *more* excess violations than the sharper COVID crash — because a fixed 250-day window absorbs sudden spikes quickly but lags behind slow, grinding regime changes.
-
-**4. None of the models are Basel Green in 2024.**  
-All three land in the Yellow zone even in a relatively calm year — an operational concern for any firm without regime-detection or volatility overlay.
-
-**5. Walk-forward design changes the conclusion.**  
-Static, full-sample backtests tell a meaningfully different story. Walk-forward methodology is more demanding, more honest, and more aligned with regulatory validation practice.
-
----
-
-## SR 11-7 / SR 26-2 Implications
-
-- Parametric Normal failure mode must be **documented in validation records**
-- Violation clustering must be **investigated** — not just counted
-- Subperiod backtesting (Table 7) should be **standard**, not optional
-- Basel Yellow zone outcomes require **documented management response**
-- **SR 26-2** (April 2026): retains backtesting as core; shifts to materiality-proportionate oversight
-
----
-
-## Toward AI-Augmented VaR — Korvane ML-LiqVaR
-
-The structural failure here — fixed-window estimators lagging slow regime transitions — motivates:
-
-| Component | Role |
-|:---|:---|
-| **GARCH-Markov Switching** | Regime detection before the window catches up |
-| **XGBoost** | Nonlinear macro-variable relationships |
-| **LSTM** | Violation clustering patterns over time |
-| **SHAP** | Interpretable forecasts for SR 26-2 regulatory review |
-
-The walk-forward three-test methodology here serves as the validation baseline for ML-LiqVaR.
+- **ML-LiqVaR** — a liquidity- and regime-aware gradient-boosting VaR model: [github.com/nirajneupane17/ml-liqvar](https://github.com/nirajneupane17/ml-liqvar). Any such model should be required to improve on filtered historical simulation under the same walk-forward design and tests.
 
 ---
 
 ## Citation
 
 ```bibtex
-@article{neupane2026var,
-  author  = {Neupane, Niraj},
-  title   = {Backtesting Value-at-Risk Models Under SR 11-7},
-  journal = {Korvane Research Series},
-  number  = {1},
-  year    = {2026}
+@misc{neupane2026var,
+  author = {Neupane, Niraj},
+  title  = {Backtesting Value-at-Risk Models: A Walk-Forward Analysis of Coverage,
+            Independence, and Regulatory Traffic-Light Tests},
+  year   = {2026},
+  note   = {Working paper, revised November 2026},
+  url    = {https://github.com/nirajneupane17/VaR-Backtesting-SR11-7}
 }
 ```
 
 ---
 
-## References
+## Key references
 
+- Barone-Adesi, G., Giannopoulos, K., & Vosper, L. (1999). VaR without correlations for portfolios of derivative securities. *Journal of Futures Markets*, 19(5), 583–602.
+- Basel Committee on Banking Supervision (2019). *Minimum capital requirements for market risk* (MAR32).
 - Christoffersen, P. F. (1998). Evaluating interval forecasts. *International Economic Review*, 39(4), 841–862.
-- Federal Reserve. (2011). *Supervisory guidance on model risk management* (SR 11-7).
-- Federal Reserve, OCC, & FDIC. (2026). *Revised guidance on model risk management* (SR 26-2).
+- Christoffersen, P., & Pelletier, D. (2004). Backtesting value-at-risk: a duration-based approach. *Journal of Financial Econometrics*, 2(1), 84–108.
+- Escanciano, J. C., & Olmo, J. (2010). Backtesting parametric value-at-risk with estimation risk. *Journal of Business & Economic Statistics*, 28(1), 36–51.
+- Kuester, K., Mittnik, S., & Paolella, M. S. (2006). Value-at-risk prediction: a comparison of alternative strategies. *Journal of Financial Econometrics*, 4(1), 53–89.
 - Kupiec, P. H. (1995). Techniques for verifying the accuracy of risk measurement models. *Journal of Derivatives*, 3(2), 73–84.
-- McNeil, A. J., Frey, R., & Embrechts, P. (2015). *Quantitative risk management* (Revised ed.). Princeton University Press.
+- Federal Reserve (2011). *Supervisory guidance on model risk management* (SR 11-7); Federal Reserve, OCC & FDIC (2026). *Revised guidance on model risk management* (SR 26-2).
+- 12 CFR 217.204 — Measure for market risk (US market risk rule).
 
 ---
 
@@ -252,6 +207,6 @@ MS Financial Economics · University of Wisconsin–Madison · Chartered Account
 
 [github.com/nirajneupane17](https://github.com/nirajneupane17)
 
-*Built with Python · NumPy · Pandas · SciPy · Matplotlib*
+*Built with Python · NumPy · Pandas · SciPy · arch · Matplotlib*
 
 </div>
