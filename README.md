@@ -11,7 +11,11 @@
 [![SciPy](https://img.shields.io/badge/SciPy-8CAAE6?style=for-the-badge&logo=scipy&logoColor=white)](https://scipy.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-**Author:** Niraj Neupane, CA (ICAI) · Quantitative Developer & Founder, Korvane & Calderyn Institute  
+**Niraj Neupane, CA (ICAI)**  
+Quantitative Researcher, Korvane · Financial Economist, Calderyn Institute  
+Founder, Wall Street Feed (WSF)  
+ORCID: [0009-0003-7026-7026](https://orcid.org/0009-0003-7026-7026) · [nirajneupane17@gmail.com](mailto:nirajneupane17@gmail.com)  
+
 **Status:** Revised version under journal review (November 2026)
 
 </div>
@@ -201,9 +205,10 @@ quantile convention (simulated p = 0.32–0.39). At 99% FHS still fails the firs
 
 <div align="center">
 
-**Niraj Neupane**  
-Quantitative Developer · Founder, Korvane & Calderyn Institute  
-MS Financial Economics · University of Wisconsin–Madison · Chartered Accountant (ICAI)
+**Niraj Neupane, CA (ICAI)**  
+Quantitative Researcher, Korvane · Financial Economist, Calderyn Institute · Founder, Wall Street Feed (WSF)  
+MS Financial Economics · University of Wisconsin–Madison  
+ORCID: [0009-0003-7026-7026](https://orcid.org/0009-0003-7026-7026) · [nirajneupane17@gmail.com](mailto:nirajneupane17@gmail.com)
 
 [github.com/nirajneupane17](https://github.com/nirajneupane17)
 
